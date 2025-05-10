@@ -12,17 +12,17 @@ model User {
   name         String
   email        String   @unique
   password     String
-  profileImage String?  // Opcional
+  phone        String
+  instagram    String
   address      Address?
+  isOng        Boolean
 }
 
 model Address {
   id         Int    @id @default(autoincrement())
-  street     String
-  number     String
+  cep        String
   city       String
   state      String
-  zipcode    String
   userId     Int    @unique
   user       User   @relation(fields: [userId], references: [id])
 }

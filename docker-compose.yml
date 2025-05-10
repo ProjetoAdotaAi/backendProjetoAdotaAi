@@ -1,16 +1,47 @@
+version: "3.8"
+
 services:
   postgres:
     container_name: db_postgres
     image: postgres:15
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: backend_faculdade
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${postgres}
+      POSTGRES_DB: ${backend_faculdade}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  adminer:
+    container_name: db_adminer
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  api:
+    container_name: minha_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}  # Conexão com o banco de dados
+    ports:
+      - "4040:4040"
+    depends_on:
+      - postgres
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
