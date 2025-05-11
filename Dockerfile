@@ -16,6 +16,7 @@ RUN npx prisma generate
 
 
 
+
 # Expõe a porta em que o servidor vai rodar
 EXPOSE 4040
 

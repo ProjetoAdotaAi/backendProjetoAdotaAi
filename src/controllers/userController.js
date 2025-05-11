@@ -15,7 +15,7 @@ export async function createUser(req, res) {
  */
 
   try {
-    const { name, phone, email, password, instagram, isOng, address } = req.body;
+    const { firebaseId, name, phone, instagram, email, password, address, isOng } = req.body;
 
     // Verifica se o email já está cadastrado
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -29,19 +29,20 @@ export async function createUser(req, res) {
 
     const user = await prisma.user.create({
       data: {
+        firebaseId,
         name,
         phone,
+        instagram,
         email,
         password: hashedPassword,
-        instagram,
-        isOng,
         address: {
           create: {
             cep: address.cep,
             city: address.city,
             state: address.state,
           }
-        }
+        },
+        isOng,
       },
     });
 
