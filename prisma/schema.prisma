@@ -9,20 +9,21 @@ generator client {
 
 model User {
   id           Int      @id @default(autoincrement())
+  firebaseId   String
   name         String
+  phone        String
+  instagram    String
   email        String   @unique
   password     String
-  profileImage String?  // Opcional
   address      Address?
+  isOng        Boolean
 }
 
 model Address {
   id         Int    @id @default(autoincrement())
-  street     String
-  number     String
+  cep        String
   city       String
   state      String
-  zipcode    String
   userId     Int    @unique
   user       User   @relation(fields: [userId], references: [id])
 }

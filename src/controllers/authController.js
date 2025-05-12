@@ -5,7 +5,14 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.SECRET_KEY;
 
-export async function login(req, res){
+export async function login(req, res) {
+    /*
+  #swagger.tags = ["Login"]
+  #swagger.summary = "Autenticação do usuário"
+  #swagger.responses[201]
+  */
+
+
     try {
         const { email, password } = req.body;
 
@@ -18,14 +25,14 @@ export async function login(req, res){
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
-        if(!isValidPassword){
+        if (!isValidPassword) {
             return res.status(401).json({ error: "Email ou senha inválidos" });
         }
 
         const token = jwt.sign({ id: user.id }, SECRET_KEY, {
             expiresIn: "1h",
         });
-        
+
         return res.status(200).json({ message: "Login bem-sucedido!", token, user });
     } catch (error) {
         console.log("Erro ao fazer login:", error);
