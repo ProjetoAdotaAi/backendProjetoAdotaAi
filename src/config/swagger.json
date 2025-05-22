@@ -204,6 +204,48 @@
             "description": "Erro ao deletar usuário"
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Atualiza a foto de perfil de um usuário usando Cloudinary",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profilePicture": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/pets/": {
@@ -401,10 +443,6 @@
       "User": {
         "type": "object",
         "properties": {
-          "firabaseId": {
-            "type": "string",
-            "example": ""
-          },
           "name": {
             "type": "string",
             "example": ""
@@ -445,6 +483,14 @@
                 "example": ""
               }
             }
+          },
+          "firabaseId": {
+            "type": "string",
+            "example": ""
+          },
+          "profilePicture": {
+            "type": "string",
+            "example": ""
           }
         },
         "xml": {
@@ -456,15 +502,15 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "Bolt"
+            "example": ""
           },
           "species": {
             "type": "string",
-            "example": "Cachorro"
+            "example": ""
           },
           "size": {
             "type": "string",
-            "example": "Médio"
+            "example": ""
           },
           "age": {
             "type": "number",
@@ -472,7 +518,7 @@
           },
           "sex": {
             "type": "string",
-            "example": "Macho"
+            "example": ""
           },
           "castrated": {
             "type": "boolean",
@@ -488,7 +534,7 @@
           },
           "description": {
             "type": "string",
-            "example": "Muito dócil e brincalhão"
+            "example": ""
           },
           "ownerId": {
             "type": "number",
@@ -496,14 +542,11 @@
           },
           "photos": {
             "type": "array",
+            "example": [
+              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z/CfAQADjAKoUu36JQAAAABJRU5ErkJggg=="
+            ],
             "items": {
-              "type": "object",
-              "properties": {
-                "url": {
-                  "type": "string",
-                  "example": "https://exemplo.com/foto2.jpg"
-                }
-              }
+              "type": "string"
             }
           }
         },

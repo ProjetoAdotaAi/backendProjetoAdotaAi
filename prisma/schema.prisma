@@ -18,6 +18,8 @@ model User {
   address      Address?
   isOng        Boolean
   profilePicture String? 
+
+  pets Pet[]
 }
 
 model Address {
