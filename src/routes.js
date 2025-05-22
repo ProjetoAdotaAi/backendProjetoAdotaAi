@@ -10,6 +10,7 @@ const routes = Router()
     routes.use('/api/login', AuthRouter);
     routes.use('/api/users', UserRouter);
     
+    
     routes.use(InternalServerError);
     routes.use(NotFound);
     
