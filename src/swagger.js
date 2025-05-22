@@ -12,30 +12,48 @@ const doc = {
         }
     ],
     components: {
-        schemas: {
-            InternalServerError: {
-                code: 500,
-                message: "Erro interno no servidor"
-            },
-            Auth: {
-                name: "",
-                email: ""
-            },
-            User: {
-                name: "",
-                email: "",
-                password: "",
-                phone: "",
-                instagram: "",
-                isOng: false,
-                address: {
-                    cep: "",
-                    city: "",
-                    state: ""
-                }
-            },
-        }
+  schemas: {
+    InternalServerError: {
+      code: 500,
+      message: "Erro interno no servidor"
+    },
+    Auth: {
+      name: "",
+      email: ""
+    },
+    User: {
+      firabaseId: "",
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      instagram: "",
+      isOng: false,
+      address: {
+        cep: "",
+        city: "",
+        state: ""
+      }
+    },
+    Pet: {
+      name: "Bolt",
+      species: "Cachorro",
+      size: "Médio",
+      age: 3,
+      sex: "Macho",
+      castrated: true,
+      dewormed: true,
+      vaccinated: true,
+      description: "Muito dócil e brincalhão",
+      ownerId: 1,
+      photos: [
+        { url: "https://exemplo.com/foto1.jpg" },
+        { url: "https://exemplo.com/foto2.jpg" }
+      ]
     }
+  }
+}
+
 };
 
 const outputFile = "./config/swagger.json";

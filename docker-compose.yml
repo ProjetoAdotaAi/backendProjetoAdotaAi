@@ -6,8 +6,8 @@ services:
     image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${postgres}
-      POSTGRES_DB: ${backend_faculdade}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}  # Conexão com o banco de dados
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "4040:4040"
     depends_on:

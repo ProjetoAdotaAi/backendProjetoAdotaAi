@@ -8,22 +8,55 @@ generator client {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  firebaseId   String
-  name         String
-  phone        String
-  instagram    String
-  email        String   @unique
-  password     String
-  address      Address?
-  isOng        Boolean
+  id         Int      @id @default(autoincrement())
+  firebaseId String
+  name       String
+  phone      String
+  instagram  String
+  email      String   @unique
+  password   String
+  address    Address?
+  isOng      Boolean
+
+  pets Pet[]
 }
 
 model Address {
-  id         Int    @id @default(autoincrement())
-  cep        String
-  city       String
-  state      String
-  userId     Int    @unique
-  user       User   @relation(fields: [userId], references: [id])
+  id     Int    @id @default(autoincrement())
+  cep    String
+  city   String
+  state  String
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
+
+model Pet {
+  id          Int  @id @default(autoincrement())
+  name        String
+  species     String
+  size        String
+  age         Int
+  sex         String
+  castrated   Boolean
+  dewormed    Boolean
+  vaccinated  Boolean
+  description String
+  adopted     Boolean @default(false)
+
+  ownerId Int
+  owner   User @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  //adoption    Adoption?
+  photos PetPhoto[] 
+}
+
+model PetPhoto {
+  id      Int    @id @default(autoincrement())
+  url     String
+  publicId String
+  petId   Int
+  pet     Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
