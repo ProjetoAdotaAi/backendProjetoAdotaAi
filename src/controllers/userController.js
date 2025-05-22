@@ -154,3 +154,42 @@ export async function deleteUser(req, res) {
     return res.status(500).json({ error: 'Ocorreu um erro ao tentar deletar o usuário.' });
   }
 }
+
+import cloudinary from '../utils/cloudinary.js';
+
+export async function updateProfilePicture(req, res) {
+  /*
+    #swagger.tags = ["Users"]
+    #swagger.summary = "Atualiza a foto de perfil de um usuário usando Cloudinary"
+  */
+  const { id } = req.params;
+  const { profilePicture } = req.body;
+
+  if (!profilePicture || typeof profilePicture !== 'string') {
+    return res.status(400).json({ error: "A imagem em base64 é obrigatória." });
+  }
+
+  try {
+    // Envia para o Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(profilePicture, {
+      folder: 'profile_pictures', // Pasta dentro do Cloudinary
+    });
+
+    // Atualiza o usuário com a URL da imagem
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(id) },
+      data: {
+        profilePicture: uploadResponse.secure_url, // salva a URL segura da imagem
+      },
+    });
+
+    return res.status(200).json({
+      message: "Foto de perfil atualizada com sucesso.",
+      profilePictureUrl: uploadResponse.secure_url,
+      updatedUser,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar foto de perfil:", error);
+    return res.status(500).json({ error: "Erro ao atualizar foto de perfil." });
+  }
+}

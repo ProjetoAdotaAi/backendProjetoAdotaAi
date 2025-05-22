@@ -17,6 +17,7 @@ model User {
   password     String
   address      Address?
   isOng        Boolean
+  profilePicture String? 
 }
 
 model Address {

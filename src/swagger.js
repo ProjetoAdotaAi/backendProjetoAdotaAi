@@ -32,7 +32,9 @@ const doc = {
                     cep: "",
                     city: "",
                     state: ""
-                }
+                },
+                fibaseId: "",
+                profilePicture: ""
             },
         }
     }
