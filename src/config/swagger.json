@@ -1,0 +1,516 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API ADOTAÍ",
+    "description": "Documentação da API ADOTAÍ"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4040/"
+    }
+  ],
+  "paths": {
+    "/api/login/": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Autenticação do usuário",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lista todos os usuários",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Usuários encontrados"
+          },
+          "500": {
+            "description": "Erro ao buscar usuários"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Cria um usuário",
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Listar um único usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Atualiza um usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Deleta um usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do usuário"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário deletado com sucesso"
+          },
+          "500": {
+            "description": "Erro ao deletar usuário"
+          }
+        }
+      }
+    },
+    "/api/pets/": {
+      "get": {
+        "tags": [
+          "Pets"
+        ],
+        "summary": "Lista todos os pets",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Pets encontrados com sucesso"
+          },
+          "500": {
+            "description": "Erro ao buscar pets"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pets"
+        ],
+        "summary": "Cadastra um novo pet",
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Pet cadastrado com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Dono não encontrado"
+          },
+          "500": {
+            "description": "Erro ao cadastrar pet"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pets/{id}": {
+      "get": {
+        "tags": [
+          "Pets"
+        ],
+        "summary": "Busca um pet pelo ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do pet"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet encontrado com sucesso"
+          },
+          "404": {
+            "description": "Pet não encontrado"
+          },
+          "500": {
+            "description": "Erro ao buscar pet"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Pets"
+        ],
+        "summary": "Atualiza os dados de um pet",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do pet"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet atualizado com sucesso"
+          },
+          "404": {
+            "description": "Pet não encontrado"
+          },
+          "500": {
+            "description": "Erro ao atualizar pet"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pets"
+        ],
+        "summary": "Deleta um pet pelo ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do pet"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet deletado com sucesso"
+          },
+          "404": {
+            "description": "Pet não encontrado"
+          },
+          "500": {
+            "description": "Erro ao deletar pet"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InternalServerError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 500
+          },
+          "message": {
+            "type": "string",
+            "example": "Erro interno no servidor"
+          }
+        },
+        "xml": {
+          "name": "InternalServerError"
+        }
+      },
+      "Auth": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": ""
+          },
+          "email": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        "xml": {
+          "name": "Auth"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "firabaseId": {
+            "type": "string",
+            "example": ""
+          },
+          "name": {
+            "type": "string",
+            "example": ""
+          },
+          "email": {
+            "type": "string",
+            "example": ""
+          },
+          "password": {
+            "type": "string",
+            "example": ""
+          },
+          "phone": {
+            "type": "string",
+            "example": ""
+          },
+          "instagram": {
+            "type": "string",
+            "example": ""
+          },
+          "isOng": {
+            "type": "boolean",
+            "example": false
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "cep": {
+                "type": "string",
+                "example": ""
+              },
+              "city": {
+                "type": "string",
+                "example": ""
+              },
+              "state": {
+                "type": "string",
+                "example": ""
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Bolt"
+          },
+          "species": {
+            "type": "string",
+            "example": "Cachorro"
+          },
+          "size": {
+            "type": "string",
+            "example": "Médio"
+          },
+          "age": {
+            "type": "number",
+            "example": 3
+          },
+          "sex": {
+            "type": "string",
+            "example": "Macho"
+          },
+          "castrated": {
+            "type": "boolean",
+            "example": true
+          },
+          "dewormed": {
+            "type": "boolean",
+            "example": true
+          },
+          "vaccinated": {
+            "type": "boolean",
+            "example": true
+          },
+          "description": {
+            "type": "string",
+            "example": "Muito dócil e brincalhão"
+          },
+          "ownerId": {
+            "type": "number",
+            "example": 1
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://exemplo.com/foto2.jpg"
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Pet"
+        }
+      }
+    }
+  }
+}

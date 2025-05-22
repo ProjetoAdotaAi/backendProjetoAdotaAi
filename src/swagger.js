@@ -12,32 +12,49 @@ const doc = {
         }
     ],
     components: {
-        schemas: {
-            InternalServerError: {
-                code: 500,
-                message: "Erro interno no servidor"
-            },
-            Auth: {
-                name: "",
-                email: ""
-            },
-            User: {
-                name: "",
-                email: "",
-                password: "",
-                phone: "",
-                instagram: "",
-                isOng: false,
-                address: {
-                    cep: "",
-                    city: "",
-                    state: ""
-                },
-                fibaseId: "",
-                profilePicture: ""
-            },
-        }
+  schemas: {
+    InternalServerError: {
+      code: 500,
+      message: "Erro interno no servidor"
+    },
+    Auth: {
+      name: "",
+      email: ""
+    },
+    User: {
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      instagram: "",
+      isOng: false,
+      address: {
+        cep: "",
+        city: "",
+        state: ""
+      },
+      firabaseId: "",
+      profilePicture: ""
+    },
+    Pet: {
+      name: "",
+      species: "",
+      size: "",
+      age: 3,
+      sex: "",
+      castrated: true,
+      dewormed: true,
+      vaccinated: true,
+      description: "",
+      ownerId: 1,
+      photos: [
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z/CfAQADjAKoUu36JQAAAABJRU5ErkJggg=="
+  ]
+
     }
+  }
+}
+
 };
 
 const outputFile = "./config/swagger.json";

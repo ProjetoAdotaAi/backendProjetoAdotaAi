@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}  # Conexão com o banco de dados
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "4040:4040"
     depends_on:
