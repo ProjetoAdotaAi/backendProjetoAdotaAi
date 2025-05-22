@@ -11,9 +11,8 @@ export async function login(req, res) {
   #swagger.summary = "Autenticação do usuário"
   #swagger.responses[201]
   */
-
-
-    try {
+ 
+  try {
         const { email, password } = req.body;
 
         const user = await prisma.user.findUnique({

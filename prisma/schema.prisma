@@ -8,17 +8,16 @@ generator client {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  firebaseId String
-  name       String
-  phone      String
-  instagram  String
-  email      String   @unique
-  password   String
-  address    Address?
-  isOng      Boolean
-
-  pets Pet[]
+  id           Int      @id @default(autoincrement())
+  firebaseId   String
+  name         String
+  phone        String
+  instagram    String
+  email        String   @unique
+  password     String
+  address      Address?
+  isOng        Boolean
+  profilePicture String? 
 }
 
 model Address {

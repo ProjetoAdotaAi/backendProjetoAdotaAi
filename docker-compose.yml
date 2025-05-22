@@ -25,7 +25,7 @@ services:
       - app-network
 
   api:
-    container_name: minha_api
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile

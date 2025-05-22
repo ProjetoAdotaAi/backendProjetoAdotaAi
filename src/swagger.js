@@ -22,7 +22,6 @@ const doc = {
       email: ""
     },
     User: {
-      firabaseId: "",
       name: "",
       email: "",
       password: "",
@@ -33,23 +32,25 @@ const doc = {
         cep: "",
         city: "",
         state: ""
-      }
+      },
+      firabaseId: "",
+      profilePicture: ""
     },
     Pet: {
-      name: "Bolt",
-      species: "Cachorro",
-      size: "Médio",
+      name: "",
+      species: "",
+      size: "",
       age: 3,
-      sex: "Macho",
+      sex: "",
       castrated: true,
       dewormed: true,
       vaccinated: true,
-      description: "Muito dócil e brincalhão",
+      description: "",
       ownerId: 1,
       photos: [
-        { url: "https://exemplo.com/foto1.jpg" },
-        { url: "https://exemplo.com/foto2.jpg" }
-      ]
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z/CfAQADjAKoUu36JQAAAABJRU5ErkJggg=="
+  ]
+
     }
   }
 }

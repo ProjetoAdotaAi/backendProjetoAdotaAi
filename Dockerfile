@@ -21,4 +21,10 @@ RUN npx prisma generate
 EXPOSE 4040
 
 # Comando para rodar o servidor na inicialização
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
+
+# Comando para rodar o servidor e a migration na inicialização - à partir da segunda execução
+CMD npx prisma migrate deploy && npm run dev
+
+
+
