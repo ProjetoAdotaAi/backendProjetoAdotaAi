@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import cloudinary from '../config/cloudinary.js';
+import { generatePetListLinks } from '../utils/hateos.js';
 
 const prisma = new PrismaClient();
 
@@ -75,7 +76,17 @@ export async function createPet(req, res) {
       }
     });
 
-    res.status(201).json({ message: "Pet cadastrado com sucesso.", pet });
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+    res.status(201).json({
+      message: "Pet cadastrado com sucesso.",
+      pet,
+      _links: {
+        self: `${baseUrl}/pets/${pet.id}`,
+        list: `${baseUrl}/pets`,
+        update: `${baseUrl}/pets/${pet.id}`,
+        delete: `${baseUrl}/pets/${pet.id}`
+      }
+    });
 
   } catch (error) {
     console.error("Erro ao cadastrar pet:", error);
@@ -96,13 +107,29 @@ export async function getPets(req, res) {
     }
   */
   try {
-    const pets = await prisma.pet.findMany({
-      include: {
-        photos: true,
-        owner: true
-      }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    const [pets, total] = await Promise.all([
+      prisma.pet.findMany({
+        skip,
+        take: limit,
+        include: { photos: true, owner: true }
+      }),
+      prisma.pet.count()
+    ]);
+
+    const links = generatePetListLinks({ req, page, limit, total });
+
+    res.json({
+      data: pets,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      _links: links
     });
-    res.json(pets);
   } catch (error) {
     console.error("Erro ao buscar pets:", error);
     res.status(500).json({ error: "Erro ao buscar pets." });
@@ -144,7 +171,16 @@ export async function getPetById(req, res) {
       return res.status(404).json({ error: "Pet não encontrado." });
     }
 
-    res.json(pet);
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+    res.json({
+      ...pet,
+      _links: {
+        self: `${baseUrl}/${pet.id}`,
+        list: `${baseUrl}`,
+        update: `${baseUrl}/${pet.id}`,
+        delete: `${baseUrl}/${pet.id}`
+      }
+    });
 
   } catch (error) {
     console.error("Erro ao buscar pet:", error);
@@ -232,7 +268,17 @@ export async function updatePet(req, res) {
       }
     });
 
-    res.json({ message: "Pet atualizado com sucesso.", pet: updatedPet });
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+    res.json({
+      message: "Pet atualizado com sucesso.",
+      pet: updatedPet,
+      _links: {
+        self: `${baseUrl}/pets/${updatedPet.id}`,
+        list: `${baseUrl}/pets`,
+        update: `${baseUrl}/pets/${updatedPet.id}`,
+        delete: `${baseUrl}/pets/${updatedPet.id}`
+      }
+    });
 
   } catch (error) {
     console.error("Erro ao atualizar pet:", error);
@@ -283,7 +329,14 @@ export async function deletePet(req, res) {
     await prisma.petPhoto.deleteMany({ where: { petId: id } });
     await prisma.pet.delete({ where: { id } });
 
-    res.json({ message: "Pet deletado com sucesso." });
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+    res.json({
+      message: "Pet deletado com sucesso.",
+      _links: {
+        list: `${baseUrl}/pets`,
+        create: `${baseUrl}/pets`
+      }
+    });
 
   } catch (error) {
     console.error("Erro ao deletar pet:", error);
