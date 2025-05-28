@@ -33,7 +33,7 @@ const doc = {
         city: "",
         state: ""
       },
-      firabaseId: "",
+      firebaseId: "",
       profilePicture: ""
     },
     Pet: {

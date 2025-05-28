@@ -1,38 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id           Int      @id @default(autoincrement())
-  firebaseId   String
-  name         String
-  phone        String
-  instagram    String
-  email        String   @unique
-  password     String
-  address      Address?
-  isOng        Boolean
-  profilePicture String? 
-
-  pets Pet[]
+  id             String   @id @default(uuid())
+  firebaseId     String
+  name           String
+  phone          String
+  instagram      String
+  email          String   @unique
+  password       String
+  isOng          Boolean
+  profilePicture String?
+  address        Address?
+  pets           Pet[]
 }
 
 model Address {
-  id     Int    @id @default(autoincrement())
+  id     String  @id @default(uuid())
   cep    String
   city   String
   state  String
-  userId Int    @unique
-  user   User   @relation(fields: [userId], references: [id])
+  userId String  @unique
+  user   User    @relation(fields: [userId], references: [id])
 }
 
 model Pet {
-  id          Int  @id @default(autoincrement())
+  id          String    @id @default(uuid())
   name        String
   species     String
   size        String
@@ -42,22 +41,17 @@ model Pet {
   dewormed    Boolean
   vaccinated  Boolean
   description String
-  adopted     Boolean @default(false)
-
-  ownerId Int
-  owner   User @relation(fields: [ownerId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  //adoption    Adoption?
-  photos PetPhoto[] 
+  adopted     Boolean    @default(false)
+  ownerId     String
+  createdAt   DateTime   @default(now())
+  owner       User       @relation(fields: [ownerId], references: [id])
+  photos      PetPhoto[]
 }
 
 model PetPhoto {
-  id      Int    @id @default(autoincrement())
-  url     String
+  id       String  @id @default(uuid())
+  url      String
   publicId String
-  petId   Int
-  pet     Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  petId    String
+  pet      Pet     @relation(fields: [petId], references: [id], onDelete: Cascade)
 }
-

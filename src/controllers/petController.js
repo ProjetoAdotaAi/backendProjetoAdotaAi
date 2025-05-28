@@ -4,28 +4,7 @@ import { generatePetListLinks } from '../utils/hateos.js';
 
 const prisma = new PrismaClient();
 
-// Criar pet
 export async function createPet(req, res) {
-  /*
-    #swagger.tags = ["Pets"]
-    #swagger.summary = "Cadastra um novo pet"
-    #swagger.requestBody = {
-      required: true,
-      schema: { $ref: "#/components/schemas/Pet" }
-    }
-    #swagger.responses[201] = {
-      description: "Pet cadastrado com sucesso"
-    }
-    #swagger.responses[400] = {
-      description: "Dados inválidos"
-    }
-    #swagger.responses[404] = {
-      description: "Dono não encontrado"
-    }
-    #swagger.responses[500] = {
-      description: "Erro ao cadastrar pet"
-    }
-  */
   try {
     const {
       name, species, size, age, sex,
@@ -37,17 +16,11 @@ export async function createPet(req, res) {
       return res.status(400).json({ error: "O campo 'id' não deve ser enviado na criação." });
     }
 
-    const ownerIdParsed = parseInt(ownerId);
-    if (isNaN(ownerIdParsed)) {
-      return res.status(400).json({ error: "ownerId inválido." });
-    }
-
-    const owner = await prisma.user.findUnique({ where: { id: ownerIdParsed } });
+    const owner = await prisma.user.findUnique({ where: { id: ownerId } });
     if (!owner) {
       return res.status(404).json({ error: "Dono (owner) não encontrado." });
     }
 
-    // Upload das imagens no Cloudinary
     let uploadedPhotos = [];
     if (Array.isArray(photos)) {
       const uploadPromises = photos.map(async (photo) => {
@@ -62,7 +35,7 @@ export async function createPet(req, res) {
         name, species, size, age, sex,
         castrated, dewormed, vaccinated,
         description,
-        owner: { connect: { id: ownerIdParsed } },
+        owner: { connect: { id: ownerId } },
         photos: {
           create: uploadedPhotos.map(p => ({
             url: p.url,
@@ -94,18 +67,7 @@ export async function createPet(req, res) {
   }
 }
 
-// Buscar todos os pets
 export async function getPets(req, res) {
-  /*
-    #swagger.tags = ["Pets"]
-    #swagger.summary = "Lista todos os pets"
-    #swagger.responses[200] = {
-      description: "Pets encontrados com sucesso"
-    }
-    #swagger.responses[500] = {
-      description: "Erro ao buscar pets"
-    }
-  */
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
@@ -136,29 +98,9 @@ export async function getPets(req, res) {
   }
 }
 
-// Buscar pet por ID
 export async function getPetById(req, res) {
-  /*
-    #swagger.tags = ["Pets"]
-    #swagger.summary = "Busca um pet pelo ID"
-    #swagger.parameters['id'] = {
-      in: 'path',
-      description: 'ID do pet',
-      required: true,
-      type: 'integer'
-    }
-    #swagger.responses[200] = {
-      description: "Pet encontrado com sucesso"
-    }
-    #swagger.responses[404] = {
-      description: "Pet não encontrado"
-    }
-    #swagger.responses[500] = {
-      description: "Erro ao buscar pet"
-    }
-  */
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const pet = await prisma.pet.findUnique({
       where: { id },
       include: {
@@ -188,33 +130,9 @@ export async function getPetById(req, res) {
   }
 }
 
-// Atualizar pet
 export async function updatePet(req, res) {
-  /*
-    #swagger.tags = ["Pets"]
-    #swagger.summary = "Atualiza os dados de um pet"
-    #swagger.parameters['id'] = {
-      in: 'path',
-      description: 'ID do pet',
-      required: true,
-      type: 'integer'
-    }
-    #swagger.requestBody = {
-      required: true,
-      schema: { $ref: "#/components/schemas/Pet" }
-    }
-    #swagger.responses[200] = {
-      description: "Pet atualizado com sucesso"
-    }
-    #swagger.responses[404] = {
-      description: "Pet não encontrado"
-    }
-    #swagger.responses[500] = {
-      description: "Erro ao atualizar pet"
-    }
-  */
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const {
       name, species, size, age, sex,
       castrated, dewormed, vaccinated,
@@ -230,7 +148,6 @@ export async function updatePet(req, res) {
       return res.status(404).json({ error: "Pet não encontrado." });
     }
 
-    // Deleta fotos antigas do Cloudinary
     for (const photo of existingPet.photos) {
       if (photo.publicId) {
         await cloudinary.uploader.destroy(photo.publicId);
@@ -239,7 +156,6 @@ export async function updatePet(req, res) {
 
     await prisma.petPhoto.deleteMany({ where: { petId: id } });
 
-    // Upload novas fotos
     let uploadedPhotos = [];
     if (Array.isArray(photos)) {
       const uploadPromises = photos.map(async (photo) => {
@@ -286,29 +202,9 @@ export async function updatePet(req, res) {
   }
 }
 
-// Deletar pet
 export async function deletePet(req, res) {
-  /*
-    #swagger.tags = ["Pets"]
-    #swagger.summary = "Deleta um pet pelo ID"
-    #swagger.parameters['id'] = {
-      in: 'path',
-      description: 'ID do pet',
-      required: true,
-      type: 'integer'
-    }
-    #swagger.responses[200] = {
-      description: "Pet deletado com sucesso"
-    }
-    #swagger.responses[404] = {
-      description: "Pet não encontrado"
-    }
-    #swagger.responses[500] = {
-      description: "Erro ao deletar pet"
-    }
-  */
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
 
     const pet = await prisma.pet.findUnique({
       where: { id },
@@ -319,7 +215,6 @@ export async function deletePet(req, res) {
       return res.status(404).json({ error: "Pet não encontrado." });
     }
 
-    // Deleta fotos do Cloudinary
     for (const photo of pet.photos) {
       if (photo.publicId) {
         await cloudinary.uploader.destroy(photo.publicId);
