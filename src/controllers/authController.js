@@ -6,6 +6,11 @@ const prisma = new PrismaClient();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 export async function login(req, res) {
+  /*
+    #swagger.tags = ["Login"]
+    #swagger.summary = "Autenticação do usuário"
+    #swagger.responses[201]
+  */
   try {
     const { email, password } = req.body;
 
@@ -30,7 +35,11 @@ export async function login(req, res) {
       expiresIn: "1h",
     });
 
-    return res.status(200).json({ message: "Login bem-sucedido!", token, user });
+    return res.status(200).json({
+      message: "Login bem-sucedido!",
+      token,
+      user,
+    });
   } catch (error) {
     console.log("Erro ao fazer login:", error);
     return res.status(500).json({ error: "Erro ao fazer login" });

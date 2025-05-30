@@ -5,6 +5,26 @@ import { generatePetListLinks } from '../utils/hateos.js';
 const prisma = new PrismaClient();
 
 export async function createPet(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Cadastra um novo pet"
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/Pet" }
+    }
+    #swagger.responses[201] = {
+      description: "Pet cadastrado com sucesso"
+    }
+    #swagger.responses[400] = {
+      description: "Dados inválidos"
+    }
+    #swagger.responses[404] = {
+      description: "Dono não encontrado"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao cadastrar pet"
+    }
+  */
   try {
     const {
       name, species, size, age, sex,
@@ -68,6 +88,16 @@ export async function createPet(req, res) {
 }
 
 export async function getPets(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Lista todos os pets"
+    #swagger.responses[200] = {
+      description: "Pets encontrados com sucesso"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao buscar pets"
+    }
+  */
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
@@ -99,6 +129,25 @@ export async function getPets(req, res) {
 }
 
 export async function getPetById(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Busca um pet pelo ID"
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID do pet',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.responses[200] = {
+      description: "Pet encontrado com sucesso"
+    }
+    #swagger.responses[404] = {
+      description: "Pet não encontrado"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao buscar pet"
+    }
+  */
   try {
     const id = req.params.id;
     const pet = await prisma.pet.findUnique({
@@ -131,6 +180,29 @@ export async function getPetById(req, res) {
 }
 
 export async function updatePet(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Atualiza os dados de um pet"
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID do pet',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/Pet" }
+    }
+    #swagger.responses[200] = {
+      description: "Pet atualizado com sucesso"
+    }
+    #swagger.responses[404] = {
+      description: "Pet não encontrado"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao atualizar pet"
+    }
+  */
   try {
     const id = req.params.id;
     const {
@@ -203,6 +275,25 @@ export async function updatePet(req, res) {
 }
 
 export async function deletePet(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Deleta um pet pelo ID"
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID do pet',
+      required: true,
+      type: 'integer'
+    }
+    #swagger.responses[200] = {
+      description: "Pet deletado com sucesso"
+    }
+    #swagger.responses[404] = {
+      description: "Pet não encontrado"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao deletar pet"
+    }
+  */
   try {
     const id = req.params.id;
 
