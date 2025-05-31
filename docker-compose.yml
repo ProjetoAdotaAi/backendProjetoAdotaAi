@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   postgres:
     container_name: db_postgres
@@ -18,7 +19,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - "8081:8081"
+      - "8080:8080"
     networks:
       - app-network
 
