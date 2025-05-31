@@ -420,6 +420,124 @@
           }
         }
       }
+    },
+    "/api/favorites/": {
+      "post": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Adiciona um pet aos favoritos do usuário",
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Pet adicionado aos favoritos com sucesso"
+          },
+          "400": {
+            "description": "Pet já está nos favoritos"
+          },
+          "404": {
+            "description": "Usuário ou pet não encontrado"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "example": "any"
+                  },
+                  "petId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/favorites/{userId}/{petId}": {
+      "delete": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Remove um pet dos favoritos do usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet removido dos favoritos com sucesso"
+          },
+          "404": {
+            "description": "Favorito não encontrado"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/favorites/{userId}": {
+      "get": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Lista todos os pets favoritos de um usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de favoritos retornada com sucesso"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/favorites/{{where{userId_petId:{userId}": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "components": {
