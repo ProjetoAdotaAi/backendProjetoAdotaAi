@@ -8,6 +8,7 @@ RUN npm install
 
 COPY . .
 
+RUN npm install prisma
 RUN npx prisma generate
 
 EXPOSE 4040
