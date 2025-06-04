@@ -77,10 +77,22 @@ export async function updateReportStatus(req, res) {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
     const report = await prisma.report.update({
       where: { id },
       data: { status }
     });
+
+    if (status === "REMOVER") {
+      await prisma.pet.delete({ where: { id: report.petId } });
+    }
+    if (status === "INATIVAR") {
+      await prisma.pet.update({
+        where: { id: report.petId },
+        data: { adopted: true }
+      });
+    }
+
     return res.status(200).json({ message: "Status atualizado.", report });
   } catch (error) {
     if (error.code === 'P2025') {
