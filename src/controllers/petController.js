@@ -2,6 +2,12 @@ import { PrismaClient } from '@prisma/client';
 import cloudinary from '../config/cloudinary.js';
 import { generatePetListLinks } from '../utils/hateos.js';
 
+// Helper function to parse comma-separated string query parameters into an array
+const parseMultiValueString = (value) => {
+  if (!value || typeof value !== 'string') return [];
+  return value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+};
+
 const prisma = new PrismaClient();
 
 export async function createPet(req, res) {
@@ -282,7 +288,7 @@ export async function deletePet(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'integer'
+      type: 'integer' 
     }
     #swagger.responses[200] = {
       description: "Pet deletado com sucesso"
@@ -306,26 +312,146 @@ export async function deletePet(req, res) {
       return res.status(404).json({ error: "Pet não encontrado." });
     }
 
+    // Delete photos from Cloudinary
     for (const photo of pet.photos) {
       if (photo.publicId) {
         await cloudinary.uploader.destroy(photo.publicId);
       }
     }
 
+    // Delete photos from DB
     await prisma.petPhoto.deleteMany({ where: { petId: id } });
+    // Delete pet
     await prisma.pet.delete({ where: { id } });
 
     const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
     res.json({
       message: "Pet deletado com sucesso.",
       _links: {
-        list: `${baseUrl}/pets`,
-        create: `${baseUrl}/pets`
+        list: `${baseUrl}/pets`, // Adjusted to list all pets
+        create: `${baseUrl}/pets`  // Adjusted to create new pet
       }
     });
 
   } catch (error) {
     console.error("Erro ao deletar pet:", error);
     res.status(500).json({ error: "Erro ao deletar pet." });
+  }
+}
+
+export async function searchPetsByPreferences(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Lista pets com base nas preferências do usuário (filtros aceitam múltiplos valores separados por vírgula)"
+    #swagger.parameters['isOng'] = { in: 'query', description: 'Postado por ONG: true ou false', type: 'boolean', required: false }
+    #swagger.parameters['species'] = { in: 'query', description: 'Espécies: Gato,Cachorro (valores separados por vírgula)', type: 'string', required: false }
+    #swagger.parameters['ageCategory'] = { in: 'query', description: 'Idade: Filhote,Adulto,Idoso (valores separados por vírgula)', type: 'string', required: false }
+    #swagger.parameters['sex'] = { in: 'query', description: 'Sexo: Macho,Femea (valores separados por vírgula)', type: 'string', required: false }
+    #swagger.parameters['size'] = { in: 'query', description: 'Porte: Pequeno,Medio,Grande (valores separados por vírgula)', type: 'string', required: false }
+    #swagger.parameters['page'] = { in: 'query', description: 'Número da página', type: 'integer', required: false, default: 1 }
+    #swagger.parameters['limit'] = { in: 'query', description: 'Número de itens por página', type: 'integer', required: false, default: 15 }
+    #swagger.responses[200] = { description: "Pets encontrados com sucesso" }
+    #swagger.responses[500] = { description: "Erro ao buscar pets" }
+  */
+  try {
+    const { species, ageCategory, sex, size } = req.query;
+    const isOngQuery = req.query.isOng; 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    const andFilters = [];
+
+    // isOng Filter (Booleano)
+    if (isOngQuery !== undefined && isOngQuery !== null && isOngQuery !== '') {
+      const isOngValue = String(isOngQuery).toLowerCase() === 'true';
+      andFilters.push({ owner: { isOng: isOngValue } });
+    }
+
+    // Species Filter
+    const speciesValues = parseMultiValueString(species);
+    if (speciesValues.length > 0) {
+      andFilters.push({ species: { in: speciesValues } });
+    }
+
+    // Age Category Filter
+    const ageCategoryValues = parseMultiValueString(ageCategory);
+    if (ageCategoryValues.length > 0) {
+      const ageRanges = {
+        filhote: { lte: 1 }, // Idade em anos, <= 1 ano
+        adulto: { gt: 1, lte: 7 }, // Idade > 1 e <= 7 anos
+        idoso: { gt: 7 }  // Idade > 7 anos
+      };
+      const ageConditions = ageCategoryValues
+        .map(cat => ageRanges[cat.toLowerCase()])
+        .filter(Boolean); // Filtra categorias inválidas ou nulas
+
+      if (ageConditions.length > 0) {
+        if (ageConditions.length === 1) {
+          andFilters.push({ age: ageConditions[0] });
+        } else {
+          andFilters.push({ OR: ageConditions.map(cond => ({ age: cond })) });
+        }
+      }
+    }
+
+    // Sex Filter
+    const sexValues = parseMultiValueString(sex);
+    if (sexValues.length > 0) {
+      andFilters.push({ sex: { in: sexValues } });
+    }
+
+    // Size Filter
+    const sizeValues = parseMultiValueString(size);
+    if (sizeValues.length > 0) {
+      andFilters.push({ size: { in: sizeValues } });
+    }
+
+    const prismaWhere = andFilters.length > 0 ? { AND: andFilters } : {};
+
+    const [pets, total] = await Promise.all([
+      prisma.pet.findMany({
+        where: prismaWhere,
+        include: {
+          photos: true,
+          owner: {
+            select: { // Mantendo o select que você configurou
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              instagram: true,
+              isOng: true,
+              profilePicture: true,
+              address: {
+                select: {
+                  city: true,
+                  state: true,
+                  cep: true
+                }
+              }
+            }
+          }
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      prisma.pet.count({ where: prismaWhere })
+    ]);
+
+    res.json({
+      data: pets,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    });
+
+  } catch (error) {
+    console.error("Erro ao buscar pets por preferências:", error);
+    res.status(500).json({ error: "Erro ao buscar pets por preferências." });
   }
 }

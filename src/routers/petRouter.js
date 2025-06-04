@@ -7,13 +7,18 @@ import {
   getPetById,
   getPets,
   updatePet,
+  searchPetsByPreferences
 } from '../controllers/petController.js';
 
 const router = Router();
-router.get('/', authenticateToken, getPets);
-router.get('/:id', authenticateToken, getPetById);
-router.post('/', authenticateToken, createPet);
-router.put('/:id', authenticateToken, updatePet);
-router.delete('/:id', authenticateToken, deletePet);
+
+router.get('/search', searchPetsByPreferences);
+
+router.get('/', getPets);
+router.get('/:id', getPetById);
+router.post('/', createPet);
+router.put('/:id', updatePet);
+router.delete('/:id', deletePet);
+
 
 export default router;
