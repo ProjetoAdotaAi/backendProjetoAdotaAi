@@ -331,6 +331,7 @@
             "required": true,
             "schema": {
               "type": "string"
+              
             }
           }
         ],

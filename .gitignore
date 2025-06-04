@@ -25,3 +25,6 @@ docker-compose.override.yml
 # Logs
 logs
 *.log
+
+#swagger
+src/config/swagger.json
