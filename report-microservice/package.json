@@ -1,0 +1,24 @@
+{
+  "name": "report-microservice",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "amqplib": "^0.10.8",
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.8.2"
+  }
+}

@@ -36,7 +36,10 @@ export async function createPet(req, res) {
       return res.status(400).json({ error: "O campo 'id' não deve ser enviado na criação." });
     }
 
-    const owner = await prisma.user.findUnique({ where: { id: ownerId } });
+    // Força ownerId para string (resolve o erro do Prisma)
+    const ownerIdStr = String(ownerId);
+
+    const owner = await prisma.user.findUnique({ where: { id: ownerIdStr } });
     if (!owner) {
       return res.status(404).json({ error: "Dono (owner) não encontrado." });
     }
@@ -55,7 +58,7 @@ export async function createPet(req, res) {
         name, species, size, age, sex,
         castrated, dewormed, vaccinated,
         description,
-        owner: { connect: { id: ownerId } },
+        owner: { connect: { id: ownerIdStr } },
         photos: {
           create: uploadedPhotos.map(p => ({
             url: p.url,
@@ -136,7 +139,7 @@ export async function getPetById(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'integer'
+      type: 'string' // <-- Corrigido para string
     }
     #swagger.responses[200] = {
       description: "Pet encontrado com sucesso"
@@ -149,7 +152,7 @@ export async function getPetById(req, res) {
     }
   */
   try {
-    const id = req.params.id;
+    const id = req.params.id; // já é string
     const pet = await prisma.pet.findUnique({
       where: { id },
       include: {
@@ -187,7 +190,7 @@ export async function updatePet(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'integer'
+      type: 'string' // <-- Corrigido para string
     }
     #swagger.requestBody = {
       required: true,
@@ -204,7 +207,7 @@ export async function updatePet(req, res) {
     }
   */
   try {
-    const id = req.params.id;
+    const id = req.params.id; // já é string
     const {
       name, species, size, age, sex,
       castrated, dewormed, vaccinated,
@@ -282,7 +285,7 @@ export async function deletePet(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'integer'
+      type: 'string' // <-- Corrigido para string
     }
     #swagger.responses[200] = {
       description: "Pet deletado com sucesso"
@@ -296,7 +299,6 @@ export async function deletePet(req, res) {
   */
   try {
     const id = req.params.id;
-
     const pet = await prisma.pet.findUnique({
       where: { id },
       include: { photos: true }
