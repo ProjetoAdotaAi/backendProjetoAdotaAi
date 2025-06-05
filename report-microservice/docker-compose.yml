@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db_report:
+    container_name: db_report
+    image: postgres:16
+    environment:
+      POSTGRES_USER: adotaai
+      POSTGRES_PASSWORD: adotaai123
+      POSTGRES_DB: reportdb
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+  report-service:
+    container_name: report-service
+    build: ./
+    environment:
+      DATABASE_URL: postgres://adotaai:adotaai123@db_report:5432/reportdb
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      RABBIT_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 5050
+    ports:
+      - "5050:5050"
+    depends_on:
+      - db_report
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
