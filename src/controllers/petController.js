@@ -145,7 +145,7 @@ export async function getPetById(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'string' // <-- Corrigido para string
+      type: 'string'
     }
     #swagger.responses[200] = {
       description: "Pet encontrado com sucesso"
@@ -196,7 +196,7 @@ export async function updatePet(req, res) {
       in: 'path',
       description: 'ID do pet',
       required: true,
-      type: 'string' // <-- Corrigido para string
+      type: 'string'
     }
     #swagger.requestBody = {
       required: true,
@@ -290,7 +290,8 @@ export async function deletePet(req, res) {
     #swagger.parameters['id'] = {
       in: 'path',
       description: 'ID do pet',
-      required: true,      type: 'string' 
+      required: true,
+      type: 'string'
     }
     #swagger.responses[200] = {
       description: "Pet deletado com sucesso"
@@ -341,19 +342,70 @@ export async function deletePet(req, res) {
 }
 
 export async function searchPetsByPreferences(req, res) {
-  /*
+   /*
     #swagger.tags = ["Pets"]
     #swagger.summary = "Lista pets com base nas preferências do usuário (filtros aceitam múltiplos valores separados por vírgula)"
-    #swagger.parameters['isOng'] = { in: 'query', description: 'Postado por ONG: true ou false', type: 'boolean', required: false }
-    #swagger.parameters['species'] = { in: 'query', description: 'Espécies: Gato,Cachorro (valores separados por vírgula)', type: 'string', required: false }
-    #swagger.parameters['ageCategory'] = { in: 'query', description: 'Idade: Filhote,Adulto,Idoso (valores separados por vírgula)', type: 'string', required: false }
-    #swagger.parameters['sex'] = { in: 'query', description: 'Sexo: Macho,Femea (valores separados por vírgula)', type: 'string', required: false }
-    #swagger.parameters['size'] = { in: 'query', description: 'Porte: Pequeno,Medio,Grande (valores separados por vírgula)', type: 'string', required: false }
-    #swagger.parameters['page'] = { in: 'query', description: 'Número da página', type: 'integer', required: false, default: 1 }
-    #swagger.parameters['limit'] = { in: 'query', description: 'Número de itens por página', type: 'integer', required: false, default: 15 }
-    #swagger.responses[200] = { description: "Pets encontrados com sucesso" }
-    #swagger.responses[500] = { description: "Erro ao buscar pets" }
+    
+    #swagger.parameters['isOng'] = {
+      in: 'query',
+      description: 'Postado por ONG: true ou false',
+      type: 'boolean',
+      required: false
+    }
+
+    #swagger.parameters['species'] = {
+      in: 'query',
+      description: 'Espécies separadas por vírgula. Ex: Gato,Cachorro',
+      type: 'string',
+      required: false
+    }
+
+    #swagger.parameters['ageCategory'] = {
+      in: 'query',
+      description: 'Idade: Filhote,Adulto,Idoso (valores separados por vírgula)',
+      type: 'string',
+      required: false
+    }
+
+    #swagger.parameters['sex'] = {
+      in: 'query',
+      description: 'Sexo: Macho,Femea (valores separados por vírgula)',
+      type: 'string',
+      required: false
+    }
+
+    #swagger.parameters['size'] = {
+      in: 'query',
+      description: 'Porte: Pequeno,Medio,Grande (valores separados por vírgula)',
+      type: 'string',
+      required: false
+    }
+
+    #swagger.parameters['page'] = {
+      in: 'query',
+      description: 'Número da página',
+      type: 'integer',
+      required: false,
+      default: 1
+    }
+
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Número de itens por página',
+      type: 'integer',
+      required: false,
+      default: 15
+    }
+
+    #swagger.responses[200] = {
+      description: "Pets encontrados com sucesso"
+    }
+
+    #swagger.responses[500] = {
+      description: "Erro ao buscar pets"
+    }
   */
+
   try {
     const { species, ageCategory, sex, size } = req.query;
     const isOngQuery = req.query.isOng; 
