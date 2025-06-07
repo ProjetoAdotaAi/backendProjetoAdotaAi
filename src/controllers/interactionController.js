@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { generatePetListLinks, addPetLinks } from '../utils/hateos.js';
 
 const prisma = new PrismaClient();
 
@@ -51,7 +52,17 @@ export async function createInteraction(req, res) {
       },
     });
 
-    res.status(201).json(interaction);
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const response = {
+      ...interaction,
+      _links: {
+        self: { href: `${baseUrl}/api/interactions` },
+        pet: { href: `${baseUrl}/api/pets/${interaction.petId}` },
+        user: { href: `${baseUrl}/api/users/${interaction.userId}` },
+      },
+    };
+
+    res.status(201).json(response);
   } catch (error) {
     if (error.code === 'P2003') {
         return res.status(404).json({ error: "Pet não encontrado." });
@@ -82,20 +93,19 @@ export async function getPetsForUser(req, res) {
     const limitNum = parseInt(limit) || 10;
     const skip = (pageNum - 1) * limitNum;
 
-    // 1. Buscar todas as interações do usuário
+    // Busca todas as interações do usuário
     const userInteractions = await prisma.petInteraction.findMany({
       where: { userId },
       select: { petId: true },
     });
     const interactedPetIds = userInteractions.map(i => i.petId);
 
-    // 2. Construir o filtro base para os pets
+    // Filtros 
     const andFilters = [
       { adopted: false },
       { ownerId: { not: userId } } // Não mostrar pets do próprio usuário
     ];
-
-    // Reutilizando a lógica de filtros de searchPetsByPreferences
+ 
     if (isOng !== undefined && isOng !== null && isOng !== '') {
       const isOngValue = String(isOng).toLowerCase() === 'true';
       andFilters.push({ owner: { isOng: isOngValue } });
@@ -121,7 +131,7 @@ export async function getPetsForUser(req, res) {
       andFilters.push({ size: { in: sizeValues } });
     }
 
-    // 3. Buscar pets com os quais o usuário AINDA NÃO interagiu
+    // Buscar pets com os quais o usuário AINDA NÃO interagiu
     let whereClause = {
       AND: [
         ...andFilters,
@@ -137,7 +147,7 @@ export async function getPetsForUser(req, res) {
       take: limitNum
     });
 
-    // 4. Se não houver pets novos, busca os descartados (com os mesmos filtros)
+    //Se não houver pets novos, busca os descartados (com os mesmos filtros)
     if (pets.length === 0) {
       const discardedInteractions = await prisma.petInteraction.findMany({
         where: { userId, type: 'DISCARDED' },
@@ -162,15 +172,19 @@ export async function getPetsForUser(req, res) {
       }
     }
 
-    // 5. Embaralhar a lista de pets da página atual
+    // Embaralhar a lista de pets da página atual e adicionar links
     const shuffledPets = shuffleArray(pets);
+    const petsWithLinks = shuffledPets.map(pet => addPetLinks(pet, req));
     
+    const links = generatePetListLinks({ req, page: pageNum, limit: limitNum, total });
+
     res.json({
-        data: shuffledPets,
+        data: petsWithLinks,
         page: pageNum,
         limit: limitNum,
         total,
         totalPages: Math.ceil(total / limitNum),
+        _links: links,
     });
 
   } catch (error) {
@@ -184,26 +198,31 @@ export async function getUserInteractions(req, res) {
     #swagger.tags = ["Interactions"]
     #swagger.summary = "Lista as interações de um usuário (favoritados ou descartados)"
     #swagger.security = [{"bearerAuth": []}]
-    #swagger.parameters['type'] = {
-        in: 'query',
-        description: 'O tipo de interação a ser listada (FAVORITED ou DISCARDED)',
-        required: true,
-        type: 'string'
-    }
+    #swagger.parameters['type'] = { in: 'query', description: 'O tipo de interação a ser listada (FAVORITED ou DISCARDED)', required: true, type: 'string' }
+    #swagger.parameters['page'] = { in: 'query', description: 'Número da página', type: 'integer' }
+    #swagger.parameters['limit'] = { in: 'query', description: 'Limite de resultados por página', type: 'integer' }
   */
   try {
     const userId = req.user.id;
-    const { type } = req.query;
+    const { type, page, limit } = req.query;
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
 
     if (!type || (type !== 'FAVORITED' && type !== 'DISCARDED')) {
       return res.status(400).json({ error: "O parâmetro 'type' é obrigatório e deve ser FAVORITED ou DISCARDED." });
     }
 
+    const where = {
+      userId,
+      type: type,
+    };
+
+    const total = await prisma.petInteraction.count({ where });
+
     const interactions = await prisma.petInteraction.findMany({
-      where: {
-        userId,
-        type: type,
-      },
+      where: where,
       include: {
         pet: {
           include: {
@@ -214,12 +233,22 @@ export async function getUserInteractions(req, res) {
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      skip: skip,
+      take: limitNum,
     });
 
-    const pets = interactions.map(interaction => interaction.pet);
+    const pets = interactions.map(interaction => addPetLinks(interaction.pet, req));
+    const links = generatePetListLinks({ req, page: pageNum, limit: limitNum, total });
 
-    res.json(pets);
+    res.json({
+      data: pets,
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+      _links: links,
+    });
   } catch (error) {
     console.error("Erro ao listar interações do usuário:", error);
     res.status(500).json({ error: "Erro ao listar interações." });
