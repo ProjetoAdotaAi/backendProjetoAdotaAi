@@ -10,3 +10,14 @@ export function generatePetListLinks({ req, page, limit, total }) {
   };
 }
 
+export function addPetLinks(pet, req) {
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  return {
+    ...pet,
+    _links: {
+      self: { href: `${baseUrl}/api/pets/${pet.id}` },
+      owner: { href: `${baseUrl}/api/users/${pet.ownerId}` }
+    }
+  };
+}
+

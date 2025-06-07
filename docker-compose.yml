@@ -49,4 +49,3 @@ services:
 
 networks:
   app-network:
-    external: true
