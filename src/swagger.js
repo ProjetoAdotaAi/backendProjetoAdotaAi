@@ -74,8 +74,8 @@ const outputFile = "./config/swagger.json";
 const endpointsFiles = ["./src/routes.js"];
 
 swaggerAutogen({ openapi: "3.0.0" })(outputFile, endpointsFiles, doc)
-    .then(async () => {
-        await import("./server.js");
+    .then(() => {
+        console.log("Documentação do Swagger gerada com sucesso em " + outputFile);
     })
     .catch((err) => {
         console.error("Erro ao gerar o Swagger JSON:", err);
