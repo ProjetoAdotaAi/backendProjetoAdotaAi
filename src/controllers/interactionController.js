@@ -1,0 +1,166 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// Função para embaralhar um array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+export async function createInteraction(req, res) {
+  /*
+    #swagger.tags = ["Interactions"]
+    #swagger.summary = "Cria uma interação (favoritar/descartar) com um pet"
+    #swagger.security = [{"bearerAuth": []}]
+    #swagger.responses[201] = {
+      description: "Interação criada com sucesso."
+    }
+  */
+  try {
+    const { petId, type } = req.body;
+    const userId = req.user.id;
+
+    const interaction = await prisma.petInteraction.create({
+      data: {
+        userId,
+        petId,
+        type,
+      },
+    });
+
+    res.status(201).json(interaction);
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: "Interação com este pet já existe." });
+    }
+    console.error("Erro ao criar interação:", error);
+    res.status(500).json({ error: "Erro ao criar interação." });
+  }
+}
+
+export async function getPetsForUser(req, res) {
+    /*
+    #swagger.tags = ["Interactions"]
+    #swagger.summary = "Retorna pets para o usuário interagir, baseado nas suas preferências e interações passadas."
+    #swagger.security = [{"bearerAuth": []}]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      description: 'Filtros de preferência do usuário.',
+      required: false,
+      schema: {
+        type: 'object',
+        properties: {
+          species: { type: 'string' },
+          size: { type: 'string' },
+          sex: { type: 'string' },
+          age: { type: 'number' }
+        }
+      }
+    }
+  */
+  try {
+    const userId = req.user.id;
+    const filters = req.query;
+
+    // 1. Buscar todas as interações do usuário
+    const userInteractions = await prisma.petInteraction.findMany({
+      where: { userId },
+      select: { petId: true },
+    });
+    const interactedPetIds = userInteractions.map(i => i.petId);
+
+    // 2. Construir o filtro base para os pets
+    const where = {
+      adopted: false,
+      ownerId: { not: userId }, // Não mostrar pets do próprio usuário
+      ...filters
+    };
+
+    // 3. Buscar pets com os quais o usuário AINDA NÃO interagiu
+    let pets = await prisma.pet.findMany({
+      where: {
+        ...where,
+        id: { notIn: interactedPetIds },
+      },
+      include: { photos: true, owner: true },
+    });
+
+    // 4. Se não houver pets novos, busca os descartados
+    if (pets.length === 0) {
+      const discardedInteractions = await prisma.petInteraction.findMany({
+        where: { userId, type: 'DISCARDED' },
+        select: { petId: true },
+      });
+      const discardedPetIds = discardedInteractions.map(i => i.petId);
+
+      if (discardedPetIds.length > 0) {
+        pets = await prisma.pet.findMany({
+          where: {
+            ...where,
+            id: { in: discardedPetIds },
+          },
+          include: { photos: true, owner: true },
+        });
+      }
+    }
+
+    // 5. Embaralhar a lista de pets
+    const shuffledPets = shuffleArray(pets);
+
+    res.json(shuffledPets);
+  } catch (error) {
+    console.error("Erro ao buscar pets para o usuário:", error);
+    res.status(500).json({ error: "Erro ao buscar pets." });
+  }
+}
+
+export async function getUserInteractions(req, res) {
+  /*
+    #swagger.tags = ["Interactions"]
+    #swagger.summary = "Lista as interações de um usuário (favoritados ou descartados)"
+    #swagger.security = [{"bearerAuth": []}]
+    #swagger.parameters['type'] = {
+        in: 'query',
+        description: 'O tipo de interação a ser listada (FAVORITED ou DISCARDED)',
+        required: true,
+        type: 'string'
+    }
+  */
+  try {
+    const userId = req.user.id;
+    const { type } = req.query;
+
+    if (!type || (type !== 'FAVORITED' && type !== 'DISCARDED')) {
+      return res.status(400).json({ error: "O parâmetro 'type' é obrigatório e deve ser FAVORITED ou DISCARDED." });
+    }
+
+    const interactions = await prisma.petInteraction.findMany({
+      where: {
+        userId,
+        type: type,
+      },
+      include: {
+        pet: {
+          include: {
+            photos: true,
+            owner: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    const pets = interactions.map(interaction => interaction.pet);
+
+    res.json(pets);
+  } catch (error) {
+    console.error("Erro ao listar interações do usuário:", error);
+    res.status(500).json({ error: "Erro ao listar interações." });
+  }
+} 
