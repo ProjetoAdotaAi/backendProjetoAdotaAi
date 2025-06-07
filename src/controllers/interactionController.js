@@ -2,6 +2,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Helper function to parse comma-separated string query parameters into an array
+const parseMultiValueString = (value) => {
+  if (!value || typeof value !== 'string') return [];
+  return value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+};
+
 // Função para embaralhar um array
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -43,28 +49,25 @@ export async function createInteraction(req, res) {
 }
 
 export async function getPetsForUser(req, res) {
-    /*
+  /*
     #swagger.tags = ["Interactions"]
-    #swagger.summary = "Retorna pets para o usuário interagir, baseado nas suas preferências e interações passadas."
+    #swagger.summary = "Retorna pets para o usuário interagir, com filtros e paginação."
     #swagger.security = [{"bearerAuth": []}]
-    #swagger.parameters['body'] = {
-      in: 'body',
-      description: 'Filtros de preferência do usuário.',
-      required: false,
-      schema: {
-        type: 'object',
-        properties: {
-          species: { type: 'string' },
-          size: { type: 'string' },
-          sex: { type: 'string' },
-          age: { type: 'number' }
-        }
-      }
-    }
+    #swagger.parameters['species'] = { in: 'query', description: 'Filtro por espécie (ex: Gato,Cachorro)', type: 'string' }
+    #swagger.parameters['ageCategory'] = { in: 'query', description: 'Filtro por idade (Filhote,Adulto,Idoso)', type: 'string' }
+    #swagger.parameters['sex'] = { in: 'query', description: 'Filtro por sexo (Macho,Femea)', type: 'string' }
+    #swagger.parameters['size'] = { in: 'query', description: 'Filtro por porte (Pequeno,Medio,Grande)', type: 'string' }
+    #swagger.parameters['isOng'] = { in: 'query', description: 'Filtro por ONG (true/false)', type: 'boolean' }
+    #swagger.parameters['page'] = { in: 'query', description: 'Número da página', type: 'integer' }
+    #swagger.parameters['limit'] = { in: 'query', description: 'Limite de resultados por página', type: 'integer' }
   */
   try {
     const userId = req.user.id;
-    const filters = req.query;
+    const { species, ageCategory, sex, size, isOng, page, limit } = req.query;
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
 
     // 1. Buscar todas as interações do usuário
     const userInteractions = await prisma.petInteraction.findMany({
@@ -74,22 +77,54 @@ export async function getPetsForUser(req, res) {
     const interactedPetIds = userInteractions.map(i => i.petId);
 
     // 2. Construir o filtro base para os pets
-    const where = {
-      adopted: false,
-      ownerId: { not: userId }, // Não mostrar pets do próprio usuário
-      ...filters
-    };
+    const andFilters = [
+      { adopted: false },
+      { ownerId: { not: userId } } // Não mostrar pets do próprio usuário
+    ];
+
+    // Reutilizando a lógica de filtros de searchPetsByPreferences
+    if (isOng !== undefined && isOng !== null && isOng !== '') {
+      const isOngValue = String(isOng).toLowerCase() === 'true';
+      andFilters.push({ owner: { isOng: isOngValue } });
+    }
+    const speciesValues = parseMultiValueString(species);
+    if (speciesValues.length > 0) {
+      andFilters.push({ species: { in: speciesValues } });
+    }
+    const ageCategoryValues = parseMultiValueString(ageCategory);
+    if (ageCategoryValues.length > 0) {
+      const ageRanges = { filhote: { lte: 1 }, adulto: { gt: 1, lte: 7 }, idoso: { gt: 7 } };
+      const ageConditions = ageCategoryValues.map(cat => ageRanges[cat.toLowerCase()]).filter(Boolean);
+      if (ageConditions.length > 0) {
+        andFilters.push({ OR: ageConditions.map(cond => ({ age: cond })) });
+      }
+    }
+    const sexValues = parseMultiValueString(sex);
+    if (sexValues.length > 0) {
+      andFilters.push({ sex: { in: sexValues } });
+    }
+    const sizeValues = parseMultiValueString(size);
+    if (sizeValues.length > 0) {
+      andFilters.push({ size: { in: sizeValues } });
+    }
 
     // 3. Buscar pets com os quais o usuário AINDA NÃO interagiu
+    let whereClause = {
+      AND: [
+        ...andFilters,
+        { id: { notIn: interactedPetIds } },
+      ],
+    };
+
+    let total = await prisma.pet.count({ where: whereClause });
     let pets = await prisma.pet.findMany({
-      where: {
-        ...where,
-        id: { notIn: interactedPetIds },
-      },
+      where: whereClause,
       include: { photos: true, owner: true },
+      skip: skip,
+      take: limitNum
     });
 
-    // 4. Se não houver pets novos, busca os descartados
+    // 4. Se não houver pets novos, busca os descartados (com os mesmos filtros)
     if (pets.length === 0) {
       const discardedInteractions = await prisma.petInteraction.findMany({
         where: { userId, type: 'DISCARDED' },
@@ -98,20 +133,33 @@ export async function getPetsForUser(req, res) {
       const discardedPetIds = discardedInteractions.map(i => i.petId);
 
       if (discardedPetIds.length > 0) {
+         whereClause = {
+          AND: [
+            ...andFilters,
+            { id: { in: discardedPetIds } },
+          ],
+        };
+        total = await prisma.pet.count({ where: whereClause });
         pets = await prisma.pet.findMany({
-          where: {
-            ...where,
-            id: { in: discardedPetIds },
-          },
+          where: whereClause,
           include: { photos: true, owner: true },
+          skip: skip,
+          take: limitNum
         });
       }
     }
 
-    // 5. Embaralhar a lista de pets
+    // 5. Embaralhar a lista de pets da página atual
     const shuffledPets = shuffleArray(pets);
+    
+    res.json({
+        data: shuffledPets,
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+    });
 
-    res.json(shuffledPets);
   } catch (error) {
     console.error("Erro ao buscar pets para o usuário:", error);
     res.status(500).json({ error: "Erro ao buscar pets." });
