@@ -20,18 +20,31 @@ function shuffleArray(array) {
 export async function createInteraction(req, res) {
   /*
     #swagger.tags = ["Interactions"]
-    #swagger.summary = "Cria uma interação (favoritar/descartar) com um pet"
+    #swagger.summary = "Cria ou atualiza uma interação (favoritar/descartar) com um pet"
     #swagger.security = [{"bearerAuth": []}]
     #swagger.responses[201] = {
-      description: "Interação criada com sucesso."
+      description: "Interação criada/atualizada com sucesso."
     }
   */
   try {
     const { petId, type } = req.body;
     const userId = req.user.id;
 
-    const interaction = await prisma.petInteraction.create({
-      data: {
+    if (!type || (type !== 'FAVORITED' && type !== 'DISCARDED')) {
+      return res.status(400).json({ error: "O campo 'type' é obrigatório e deve ser FAVORITED ou DISCARDED." });
+    }
+
+    const interaction = await prisma.petInteraction.upsert({
+      where: {
+        userId_petId: {
+          userId,
+          petId,
+        },
+      },
+      update: {
+        type: type,
+      },
+      create: {
         userId,
         petId,
         type,
@@ -40,11 +53,11 @@ export async function createInteraction(req, res) {
 
     res.status(201).json(interaction);
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: "Interação com este pet já existe." });
+    if (error.code === 'P2003') {
+        return res.status(404).json({ error: "Pet não encontrado." });
     }
-    console.error("Erro ao criar interação:", error);
-    res.status(500).json({ error: "Erro ao criar interação." });
+    console.error("Erro ao criar/atualizar interação:", error);
+    res.status(500).json({ error: "Erro ao criar ou atualizar interação." });
   }
 }
 
