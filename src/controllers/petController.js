@@ -415,25 +415,22 @@ export async function searchPetsByPreferences(req, res) {
 
     const andFilters = [];
 
-    // isOng Filter (Booleano)
     if (isOngQuery !== undefined && isOngQuery !== null && isOngQuery !== '') {
       const isOngValue = String(isOngQuery).toLowerCase() === 'true';
       andFilters.push({ owner: { isOng: isOngValue } });
     }
 
-    // Species Filter
     const speciesValues = parseMultiValueString(species);
     if (speciesValues.length > 0) {
       andFilters.push({ species: { in: speciesValues } });
     }
 
-    // Age Category Filter
     const ageCategoryValues = parseMultiValueString(ageCategory);
     if (ageCategoryValues.length > 0) {
       const ageRanges = {
-        filhote: { lte: 1 }, // Idade em anos, <= 1 ano
-        adulto: { gt: 1, lte: 7 }, // Idade > 1 e <= 7 anos
-        idoso: { gt: 7 }  // Idade > 7 anos
+        filhote: { lte: 1 }, 
+        adulto: { gt: 1, lte: 7 }, 
+        idoso: { gt: 7 }  
       };
       const ageConditions = ageCategoryValues
         .map(cat => ageRanges[cat.toLowerCase()])
@@ -448,13 +445,11 @@ export async function searchPetsByPreferences(req, res) {
       }
     }
 
-    // Sex Filter
     const sexValues = parseMultiValueString(sex);
     if (sexValues.length > 0) {
       andFilters.push({ sex: { in: sexValues } });
     }
 
-    // Size Filter
     const sizeValues = parseMultiValueString(size);
     if (sizeValues.length > 0) {
       andFilters.push({ size: { in: sizeValues } });
@@ -468,7 +463,7 @@ export async function searchPetsByPreferences(req, res) {
         include: {
           photos: true,
           owner: {
-            select: { // Mantendo o select que você configurou
+            select: { // Mantendo o select 
               id: true,
               name: true,
               email: true,

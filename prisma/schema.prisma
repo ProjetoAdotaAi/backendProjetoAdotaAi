@@ -19,7 +19,7 @@ model User {
   profilePicture String?
   address        Address?
   pets           Pet[]
-  favorites      FavoritePet[]
+  interactions   PetInteraction[]
 }
 
 model Address {
@@ -47,7 +47,7 @@ model Pet {
   createdAt   DateTime   @default(now())
   owner       User       @relation(fields: [ownerId], references: [id])
   photos      PetPhoto[]
-  favoritedBy FavoritePet[]
+  petInteractions PetInteraction[]
 }
 
 model PetPhoto {
@@ -68,13 +68,19 @@ model Report {
   updatedAt  DateTime @updatedAt
 }
 
-model FavoritePet {
-  id        String   @id @default(uuid())
+enum InteractionType {
+  FAVORITED
+  DISCARDED
+}
+
+model PetInteraction {
+  id        String          @id @default(uuid())
   userId    String
   petId     String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  pet       Pet      @relation(fields: [petId], references: [id])
+  type      InteractionType
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id])
+  pet       Pet             @relation(fields: [petId], references: [id])
 
   @@unique([userId, petId])
 }
