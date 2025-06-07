@@ -8,7 +8,6 @@ import {
 
 const router = Router();
 
-// Todas as rotas aqui são autenticadas
 router.use(authenticateToken);
 
 router.post('/', createInteraction);

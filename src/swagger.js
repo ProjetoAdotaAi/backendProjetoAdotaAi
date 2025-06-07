@@ -1,4 +1,7 @@
 import swaggerAutogen from "swagger-autogen";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const doc = {
     info: {
@@ -11,7 +14,17 @@ const doc = {
             url: "http://localhost:4040/"
         }
     ],
+    security: [{
+        bearerAuth: []
+    }],
     components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            }
+        },
   schemas: {
     InternalServerError: {
       code: 500,

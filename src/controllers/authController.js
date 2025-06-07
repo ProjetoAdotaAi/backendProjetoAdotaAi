@@ -9,6 +9,7 @@ export async function login(req, res) {
   /*
     #swagger.tags = ["Login"]
     #swagger.summary = "Autenticação do usuário"
+    #swagger.security = []
     #swagger.responses[201]
   */
   try {
