@@ -10,6 +10,7 @@ COPY . .
 
 RUN npm install prisma
 RUN npx prisma generate
+RUN npm run swagger:gen
 
 EXPOSE 4040
 

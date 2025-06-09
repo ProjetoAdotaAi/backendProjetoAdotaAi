@@ -1,4 +1,7 @@
 import swaggerAutogen from "swagger-autogen";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const doc = {
     info: {
@@ -11,7 +14,17 @@ const doc = {
             url: "http://localhost:4040/"
         }
     ],
+    security: [{
+        bearerAuth: []
+    }],
     components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            }
+        },
   schemas: {
     InternalServerError: {
       code: 500,
@@ -61,8 +74,8 @@ const outputFile = "./config/swagger.json";
 const endpointsFiles = ["./src/routes.js"];
 
 swaggerAutogen({ openapi: "3.0.0" })(outputFile, endpointsFiles, doc)
-    .then(async () => {
-        await import("./server.js");
+    .then(() => {
+        console.log("Documentação do Swagger gerada com sucesso em " + outputFile);
     })
     .catch((err) => {
         console.error("Erro ao gerar o Swagger JSON:", err);

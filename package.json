@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node src/swagger.js && node src/server.js",
-    "start": "node src/swagger.js && node src/server.js",
-    "start:watch": "node src/swagger.js && node src/server.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "swagger:gen": "node src/swagger.js"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",

@@ -9,6 +9,7 @@ export async function login(req, res) {
   /*
     #swagger.tags = ["Login"]
     #swagger.summary = "Autenticação do usuário"
+    #swagger.security = []
     #swagger.responses[201]
   */
   try {
@@ -16,6 +17,9 @@ export async function login(req, res) {
 
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        address: true,
+      },
     });
 
     if (!user) {
@@ -35,10 +39,13 @@ export async function login(req, res) {
       expiresIn: "1h",
     });
 
+    const { password: _, address, ...userResponse } = user;
+
     return res.status(200).json({
       message: "Login bem-sucedido!",
       token,
-      user,
+      user: userResponse,
+      address,
     });
   } catch (error) {
     console.log("Erro ao fazer login:", error);

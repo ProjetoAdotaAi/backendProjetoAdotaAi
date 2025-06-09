@@ -39,6 +39,8 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db_postgres:5432/backend_faculdade
       RABBIT_URL: amqp://guest:guest@rabbitmq:5672
       PORT: 4040
+    env_file:
+      - .env
     ports:
       - "4040:4040"
     depends_on:

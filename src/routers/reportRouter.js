@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 import {
   createReport,
   updateReportStatus,
@@ -6,6 +7,8 @@ import {
 } from '../controllers/reportController.js';
 
 const router = Router();
+
+router.use(authenticateToken);
 
 router.post('/', createReport);
 router.patch('/:id/status', updateReportStatus);

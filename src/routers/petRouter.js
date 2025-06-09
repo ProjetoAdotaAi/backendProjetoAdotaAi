@@ -16,9 +16,10 @@ router.get('/search', searchPetsByPreferences);
 
 router.get('/', getPets);
 router.get('/:id', getPetById);
-router.post('/', createPet);
-router.put('/:id', updatePet);
-router.delete('/:id', deletePet);
+
+router.post('/', authenticateToken, createPet);
+router.put('/:id', authenticateToken, updatePet);
+router.delete('/:id', authenticateToken, deletePet);
 
 
 export default router;

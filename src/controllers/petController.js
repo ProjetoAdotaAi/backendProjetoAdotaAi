@@ -100,6 +100,7 @@ export async function getPets(req, res) {
   /*
     #swagger.tags = ["Pets"]
     #swagger.summary = "Lista todos os pets"
+    #swagger.security = []
     #swagger.responses[200] = {
       description: "Pets encontrados com sucesso"
     }
@@ -141,6 +142,7 @@ export async function getPetById(req, res) {
   /*
     #swagger.tags = ["Pets"]
     #swagger.summary = "Busca um pet pelo ID"
+    #swagger.security = []
     #swagger.parameters['id'] = {
       in: 'path',
       description: 'ID do pet',
@@ -345,6 +347,7 @@ export async function searchPetsByPreferences(req, res) {
    /*
     #swagger.tags = ["Pets"]
     #swagger.summary = "Lista pets com base nas preferências do usuário (filtros aceitam múltiplos valores separados por vírgula)"
+    #swagger.security = []
     
     #swagger.parameters['isOng'] = {
       in: 'query',
