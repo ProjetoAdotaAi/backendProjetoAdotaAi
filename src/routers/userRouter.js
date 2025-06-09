@@ -15,7 +15,6 @@ const router = Router();
 // Rota pública para criar usuário
 router.post('/', createUser);
 
-
 router.use(authenticateToken);
 
 router.get('/', getUsers);

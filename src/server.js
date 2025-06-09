@@ -1,8 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import http from "node:http";
 import app from "./app.js";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const error = (err) => {
   console.error(`An error has occurred on start server\n ${err.message}`);
