@@ -7,13 +7,11 @@ export async function handleReport(req, res, next) {
   try {
     const { petId, userId, reportText } = req.body;
 
-    // Busca a primeira foto do pet
     const photo = await prisma.petPhoto.findFirst({ where: { petId } });
     if (!photo) {
       return res.status(404).json({ error: "Foto do pet não encontrada." });
     }
 
-    // Baixa a imagem e converte para base64
     const { base64, mimeType } = await fetchImageAsBase64(photo.url);
 
     const aiResult = await analyzeReport({

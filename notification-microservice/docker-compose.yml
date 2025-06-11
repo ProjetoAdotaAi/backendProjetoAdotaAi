@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db_notification:
+    container_name: db_notification
+    image: postgres:16
+    environment:
+      POSTGRES_USER: adotaai
+      POSTGRES_PASSWORD: adotaai123
+      POSTGRES_DB: notificationdb
+    ports:
+      - "5435:5432"
+    networks:
+      - app-network
+
+  notification-service:
+    container_name: notification-service
+    build: ./
+    environment:
+      DATABASE_URL: postgres://adotaai:adotaai123@db_notification:5432/notificationdb
+      RABBIT_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 6060
+    ports:
+      - "6060:6060"
+    depends_on:
+      - db_notification
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true

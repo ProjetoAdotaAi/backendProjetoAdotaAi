@@ -3,6 +3,17 @@ import { sendReportToQueue } from '../utils/rabbit.js';
 
 const prisma = new PrismaClient();
 
+async function sendNotificationToQueue(notification) {
+  const conn = await amqp.connect(process.env.RABBIT_URL);
+  const channel = await conn.createChannel();
+  const queue = "notificationQueue";
+  await channel.assertQueue(queue, { durable: true });
+  channel.sendToQueue(queue, Buffer.from(JSON.stringify(notification)), { persistent: true });
+  setTimeout(() => {
+    channel.close();
+    conn.close();
+  }, 500);
+}
 export async function createReport(req, res) {
   /*
   #swagger.tags = ["Reports"]
@@ -85,6 +96,21 @@ export async function updateReportStatus(req, res) {
 
     if (status === "REMOVER") {
       await prisma.pet.delete({ where: { id: report.petId } });
+
+      const user = await prisma.user.findUnique({ where: { id: report.userId } });
+      const deviceToken = user?.deviceToken;
+      if (deviceToken) {
+        await sendNotificationToQueue({
+          userId: report.userId,
+          deviceToken,
+          title: "Obrigado pelo seu reporte!",
+          body: "Agradecemos por ajudar a manter a comunidade segura. O post foi removido.",
+          data: {
+            tipo: "agradecimento_report",
+            petId: report.petId
+          }
+        });
+      }
     }
     if (status === "INATIVAR") {
       await prisma.pet.update({
