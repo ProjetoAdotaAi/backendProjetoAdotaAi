@@ -491,3 +491,90 @@ export async function searchPetsByPreferences(req, res) {
     res.status(500).json({ error: "Erro ao buscar pets por preferências." });
   }
 }
+
+export async function getPetsByOwner(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Lista todos os pets de um usuário específico"
+    #swagger.parameters['ownerId'] = {
+      in: 'path',
+      description: 'ID do usuário (dono dos pets)',
+      required: true,
+      type: 'string'
+    }
+    #swagger.parameters['page'] = {
+      in: 'query',
+      description: 'Número da página',
+      type: 'integer',
+      required: false,
+      default: 1
+    }
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Número de itens por página',
+      type: 'integer',
+      required: false,
+      default: 15
+    }
+    #swagger.responses[200] = {
+      description: "Pets do usuário encontrados com sucesso"
+    }
+    #swagger.responses[404] = {
+      description: "Usuário não encontrado"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao buscar pets do usuário"
+    }
+  */
+  try {
+    const { ownerId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    // Verificar se o usuário existe
+    const owner = await prisma.user.findUnique({
+      where: { id: ownerId },
+    });
+
+    if (!owner) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    const where = { ownerId: ownerId };
+
+    const [pets, total] = await Promise.all([
+      prisma.pet.findMany({
+        where,
+        skip,
+        take: limit,
+        include: { photos: true, owner: true },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      prisma.pet.count({ where })
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const baseUrl = `${req.protocol}://${req.get('host')}/api/users/${ownerId}/pets`;
+
+    res.json({
+      data: pets,
+      page,
+      limit,
+      total,
+      totalPages,
+      _links: {
+        first: `${baseUrl}?page=1&limit=${limit}`,
+        last: `${baseUrl}?page=${totalPages}&limit=${limit}`,
+        prev: page > 1 ? `${baseUrl}?page=${page - 1}&limit=${limit}` : null,
+        next: page < totalPages ? `${baseUrl}?page=${page + 1}&limit=${limit}` : null,
+      }
+    });
+
+  } catch (error) {
+    console.error("Erro ao buscar pets do usuário:", error);
+    res.status(500).json({ error: "Erro ao buscar pets do usuário." });
+  }
+}
