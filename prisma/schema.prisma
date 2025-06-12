@@ -28,16 +28,38 @@ model Address {
   city   String
   state  String
   userId String  @unique
-  user   User    @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum PetAge {
+  YOUNG
+  ADULT
+  SENIOR 
+}
+
+enum PetSize {
+  SMALL
+  MEDIUM
+  LARGE 
+}
+
+enum PetSex {
+  MALE
+  FEMALE
+}
+
+enum PetSpecie {
+  DOG
+  CAT
 }
 
 model Pet {
   id          String    @id @default(uuid())
   name        String
-  species     String
-  size        String
-  age         Int
-  sex         String
+  species     PetSpecie
+  size        PetSize
+  age         PetAge
+  sex         PetSex
   castrated   Boolean
   dewormed    Boolean
   vaccinated  Boolean
@@ -79,8 +101,8 @@ model PetInteraction {
   petId     String
   type      InteractionType
   createdAt DateTime        @default(now())
-  user      User            @relation(fields: [userId], references: [id])
-  pet       Pet             @relation(fields: [petId], references: [id])
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet       Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
 
   @@unique([userId, petId])
 }

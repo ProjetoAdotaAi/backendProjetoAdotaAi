@@ -8,7 +8,6 @@
       /*
     #swagger.tags = ["Users"]
     #swagger.summary = "Cria um usuário"
-    #swagger.security = []
     #swagger.requestBody = {
       required: true,
       schema: { $ref: "#/components/schemas/User" }

@@ -114,15 +114,13 @@ export async function getPetsForUser(req, res) {
     if (speciesValues.length > 0) {
       andFilters.push({ species: { in: speciesValues } });
     }
+
     const ageCategoryValues = parseMultiValueString(ageCategory);
     if (ageCategoryValues.length > 0) {
-      const ageRanges = { filhote: { lte: 1 }, adulto: { gt: 1, lte: 7 }, idoso: { gt: 7 } };
-      const ageConditions = ageCategoryValues.map(cat => ageRanges[cat.toLowerCase()]).filter(Boolean);
-      if (ageConditions.length > 0) {
-        andFilters.push({ OR: ageConditions.map(cond => ({ age: cond })) });
-      }
+      andFilters.push({ age: { in: ageCategoryValues } });
     }
-    const sexValues = parseMultiValueString(sex);
+
+     const sexValues = parseMultiValueString(sex);
     if (sexValues.length > 0) {
       andFilters.push({ sex: { in: sexValues } });
     }

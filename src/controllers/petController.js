@@ -430,22 +430,7 @@ export async function searchPetsByPreferences(req, res) {
 
     const ageCategoryValues = parseMultiValueString(ageCategory);
     if (ageCategoryValues.length > 0) {
-      const ageRanges = {
-        filhote: { lte: 1 }, 
-        adulto: { gt: 1, lte: 7 }, 
-        idoso: { gt: 7 }  
-      };
-      const ageConditions = ageCategoryValues
-        .map(cat => ageRanges[cat.toLowerCase()])
-        .filter(Boolean); // Filtra categorias inválidas ou nulas
-
-      if (ageConditions.length > 0) {
-        if (ageConditions.length === 1) {
-          andFilters.push({ age: ageConditions[0] });
-        } else {
-          andFilters.push({ OR: ageConditions.map(cond => ({ age: cond })) });
-        }
-      }
+      andFilters.push({ age: { in: ageCategoryValues } });
     }
 
     const sexValues = parseMultiValueString(sex);
