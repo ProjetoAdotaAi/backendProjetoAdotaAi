@@ -5,10 +5,13 @@ import {
     createUser,
     deleteUser,
     getUserById,
-    getUsers,
     updateUser,
     updateProfilePicture,
+    getAllUsers,
+    searchUsers,
 } from '../controllers/userController.js';
+
+import { getPetsByOwner } from '../controllers/petController.js';
 
 const router = Router();
 
@@ -17,11 +20,12 @@ router.post('/', createUser);
 
 router.use(authenticateToken);
 
-router.get('/', getUsers);
+router.get('/', getAllUsers);
+router.get('/search', searchUsers);
 router.get('/:id', getUserById);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
 router.patch('/:id', updateProfilePicture);
-
+router.get('/:ownerId/pets', getPetsByOwner);
 
 export default router;
