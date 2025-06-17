@@ -8,6 +8,15 @@ const prisma = new PrismaClient();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 export async function login(req, res) {
+   /*
+    #swagger.tags = ["Login"]
+    #swagger.summary = "Autentica um usuário"
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/Auth" }
+    }
+    #swagger.responses[201]
+    */
   try {
     const { email, password } = req.body;
 
@@ -44,6 +53,15 @@ function generateOtp() {
 }
 
 export async function sendOtp(req, res) {
+   /*
+    #swagger.tags = ["Login"]
+    #swagger.summary = "Envia o código de recuperação de senha ao e-mail"
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/sendOtp" }
+    }
+    #swagger.responses[201]
+    */
   const { email } = req.body;
   const otp = generateOtp();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
@@ -80,6 +98,15 @@ export async function sendOtp(req, res) {
 }
 
 export async function resetPassword(req, res) {
+  /*
+    #swagger.tags = ["Login"]
+    #swagger.summary = "Reseta a senha do usuário"
+    #swagger.requestBody = {
+      required: true,
+      schema: { $ref: "#/components/schemas/resetPassword" }
+    }
+    #swagger.responses[201]
+    */
   const { email, otp, newPassword } = req.body;
 
   const reset = await prisma.passwordReset.findFirst({
