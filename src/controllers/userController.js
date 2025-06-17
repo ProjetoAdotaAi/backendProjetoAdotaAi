@@ -8,7 +8,6 @@
       /*
     #swagger.tags = ["Users"]
     #swagger.summary = "Cria um usuário"
-    #swagger.security = []
     #swagger.requestBody = {
       required: true,
       schema: { $ref: "#/components/schemas/User" }
@@ -179,5 +178,106 @@
     } catch (error) {
       console.error("Erro ao atualizar foto de perfil:", error);
       return res.status(500).json({ error: "Erro ao atualizar foto de perfil." });
+    }
+  }
+
+  export async function getAllUsers(req, res) {
+    /*
+      #swagger.tags = ["Users"]
+      #swagger.summary = "Lista todos os usuários"
+      #swagger.parameters['isOng'] = {
+        in: 'query',
+        description: 'Filtra por usuários que são ONGs (true) ou não (false)',
+        type: 'boolean',
+        required: false
+      }
+      #swagger.responses[200] = {
+        description: "Usuários encontrados com sucesso"
+      }
+      #swagger.responses[500] = {
+        description: "Erro ao buscar usuários"
+      }
+    */
+    try {
+      const { isOng } = req.query;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 15;
+      const skip = (page - 1) * limit;
+
+      const where = {};
+      if (isOng !== undefined && isOng !== null && isOng !== '') {
+        where.isOng = String(isOng).toLowerCase() === 'true';
+      }
+
+      const [users, total] = await Promise.all([
+        prisma.user.findMany({
+          where,
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            isOng: true,
+            profilePicture: true,
+            address: {
+              select: {
+                city: true,
+                state: true,
+              },
+            },
+          },
+        }),
+        prisma.user.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+
+      res.json({
+        data: users,
+        page,
+        limit,
+        total,
+        totalPages,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      res.status(500).json({ error: "Erro ao buscar usuários." });
+    }
+  }
+
+  export async function searchUsers(req, res) {
+    /*
+    #swagger.tags = ["Users"]
+    #swagger.summary = "Pesquisa usuários"
+    #swagger.parameters['query'] = {
+      in: 'query',
+      description: 'Termo de busca',
+      type: 'string',
+      required: true
+    }
+    #swagger.responses[200] = {
+      description: "Usuários encontrados com sucesso"
+    }
+    #swagger.responses[500] = {
+      description: "Erro ao buscar usuários"
+    }
+    */
+    try {
+      const { query } = req.query;
+      const users = await prisma.user.findMany({
+        where: {
+          OR: [
+            { name: { contains: query } },
+            { email: { contains: query } },
+            { phone: { contains: query } },
+          ],
+        },
+      });
+      return res.status(200).json(users);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      return res.status(500).json({ error: "Erro ao buscar usuários." });
     }
   }
