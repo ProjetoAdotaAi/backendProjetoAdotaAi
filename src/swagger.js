@@ -1,6 +1,7 @@
 import swaggerAutogen from "swagger-autogen";
 import dotenv from "dotenv";
 
+
 dotenv.config();
 
 const doc = {
@@ -31,8 +32,16 @@ const doc = {
       message: "Erro interno no servidor"
     },
     Auth: {
-      name: "",
-      email: ""
+      email: "",
+      password: ""
+    },
+    sendOtp: {
+      email: "",
+    },
+    resetPassword: {
+      email: "",
+      otp: "",
+      newPassword: ""
     },
     User: {
       name: "",
