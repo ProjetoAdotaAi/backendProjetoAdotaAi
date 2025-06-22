@@ -252,3 +252,36 @@ export async function getUserInteractions(req, res) {
     res.status(500).json({ error: "Erro ao listar interações." });
   }
 } 
+
+export async function favoritePet(req, res){
+  /*
+    #swagger.tags = ["Interactions"]
+    #swagger.summary = "Favorita um pet"
+    #swagger.security = [{"bearerAuth": []}]
+    #swagger.responses[201] = {
+      description: "Pet favoritado com sucesso."
+    }
+    #swagger.responses[400] = {
+      description: "Erro ao favoritar pet."
+    }
+    #swagger.responses[404] = {
+
+  */
+  try {
+    const {userId, petId, type} = req.body;
+
+    const interaction = await prisma.petInteraction.create({
+      data: {
+        userId,
+        petId,  
+        type,
+      },
+    });
+
+    res.status(201).json(interaction);
+  } catch (error) {
+    console.error("Erro ao favoritar pet:", error);
+    res.status(500).json({ error: "Erro ao favoritar pet." });
+  }
+  
+}
