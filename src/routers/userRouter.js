@@ -19,7 +19,6 @@ const router = Router();
 router.post('/', createUser);
 
 router.use(authenticateToken);
-
 router.get('/', getAllUsers);
 router.get('/search', searchUsers);
 router.get('/:id', getUserById);
