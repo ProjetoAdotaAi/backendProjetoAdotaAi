@@ -7,6 +7,7 @@ export async function handleReport(req, res, next) {
   try {
     const { petId, userId, reportText } = req.body;
 
+    console.log(petId, userId, reportText, "REPORT RECEIVED");
     // Busca a primeira foto do pet
     const photo = await prisma.petPhoto.findFirst({ where: { petId } });
     if (!photo) {
