@@ -100,13 +100,25 @@
     #swagger.responses[201]
     */
     const { id } = req.params;
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, instagram, isOng } = req.body;
 
     try {
       let updateData = { name, email };
 
       if (password) {
         updateData.password = await bcrypt.hash(password, 10);
+      }
+
+      if (phone) {
+        updateData.phone = phone;
+      }
+
+      if (instagram) {
+        updateData.instagram = instagram;
+      }
+
+      if (isOng) {
+        updateData.isOng = isOng;
       }
 
       const updatedUser = await prisma.user.update({
