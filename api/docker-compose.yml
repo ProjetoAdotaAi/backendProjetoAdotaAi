@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  db_postgres:
+    container_name: db_postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: backend_faculdade
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-network
+
+  adminer:
+    container_name: db_adminer
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  api:
+    container_name: api
+    build: .
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db_postgres:5432/backend_faculdade
+      RABBIT_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: 4040
+    env_file:
+      - .env
+    ports:
+      - "4040:4040"
+    depends_on:
+      - db_postgres
+      - rabbitmq
+    networks:
+      - app-network
+
+networks:
+  app-network:
