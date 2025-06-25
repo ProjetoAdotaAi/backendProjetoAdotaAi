@@ -8,10 +8,11 @@ import {
 
 const router = Router();
 
+router.patch('/:id/status', updateReportStatus);
+
 router.use(authenticateToken);
 
 router.post('/', createReport);
-router.patch('/:id/status', updateReportStatus);
 router.get('/', listReports);
 
 export default router;

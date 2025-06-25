@@ -10,6 +10,15 @@ const parseMultiValueString = (value) => {
 
 const prisma = new PrismaClient();
 
+// Função auxiliar para extrair o publicId de uma URL do Cloudinary
+function extractPublicIdFromUrl(url) {
+  const parts = url.split('/upload/');
+  if (parts.length < 2) return null;
+  // Remove parâmetros de query e extensão
+  const path = parts[1].split('.')[0];
+  return path;
+}
+//////////////////////////////////////////////////
 export async function createPet(req, res) {
   /*
     #swagger.tags = ["Pets"]
@@ -242,8 +251,14 @@ export async function updatePet(req, res) {
     let uploadedPhotos = [];
     if (Array.isArray(photos)) {
       const uploadPromises = photos.map(async (photo) => {
-        const result = await cloudinary.uploader.upload(photo, { folder: 'pets' });
-        return { url: result.secure_url, publicId: result.public_id };
+        if (typeof photo === 'string' && photo.startsWith('http')) {
+          // Extrai o publicId da URL
+          const publicId = extractPublicIdFromUrl(photo);
+          return { url: photo, publicId };
+        } else {
+          const result = await cloudinary.uploader.upload(photo, { folder: 'pets' });
+          return { url: result.secure_url, publicId: result.public_id };
+        }
       });
       uploadedPhotos = await Promise.all(uploadPromises);
     }
