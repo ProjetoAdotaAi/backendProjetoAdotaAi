@@ -38,17 +38,17 @@ Na primeira vez que for rodar o projeto, é necessário abrir um outro terminal 
    - **API principal:**
      ```bash
      docker exec -it api sh
-     npx prisma migrate deploy
+     npx prisma migrate dev --name init
      ```
    - **Report Microservice:**
      ```bash
      docker exec -it report-service sh
-     npx prisma migrate deploy
+     npx prisma migrate dev --name init
      ```
     - **Report Microservice:**
     ```bash
     docker exec -it notification-service sh
-    npx prisma migrate deploy
+    npx prisma migrate dev --name init
     ```
 
 
