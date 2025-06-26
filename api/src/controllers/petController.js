@@ -147,6 +147,65 @@ export async function getPets(req, res) {
   }
 }
 
+export async function getPetsByLoggedOwner(req, res) {
+  /*
+    #swagger.tags = ["Pets"]
+    #swagger.summary = "Lista todos os pets de um usuário logado"
+    #swagger.security = []
+    #swagger.parameters['page'] = {
+      in: 'query',
+      description: 'Número da página',
+      type: 'integer',
+      required: false,
+      default: 1
+    } 
+    #swagger.parameters['limit'] = {
+      in: 'query',
+      description: 'Número de itens por página',
+      type: 'integer',
+      required: false,
+      default: 15
+    } 
+  */ 
+  try {
+    const userId = req.user.id;
+    console.log("userId", userId);
+    console.log("req.query", req.query);
+    console.log("req.user", req.user);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    const [pets, total] = await Promise.all([
+      prisma.pet.findMany({
+      where: { ownerId: userId },
+      include: { photos: true, owner: true },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    }),
+    prisma.pet.count({ where: { ownerId: userId } })
+  ]);
+
+    const links = generatePetListLinks({ req, page, limit, total });
+   
+    res.json({
+      data: pets,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      _links: links
+    });
+  } catch (error) {
+    console.error("Erro ao buscar pets:", error);
+    res.status(500).json({ error: "Erro ao buscar pets." });
+  } 
+}
+
+
 export async function getPetById(req, res) {
   /*
     #swagger.tags = ["Pets"]
