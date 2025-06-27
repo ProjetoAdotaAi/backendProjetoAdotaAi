@@ -62,7 +62,8 @@ export async function createPet(req, res) {
     let uploadedPhotos = [];
     if (Array.isArray(photos)) {
       const uploadPromises = photos.map(async (photo) => {
-        const result = await cloudinary.uploader.upload(photo, { folder: 'pets' });
+        const base64String = typeof photo === 'string' ? photo : photo.url;
+        const result = await cloudinary.uploader.upload(base64String, { folder: 'pets' });
         return { url: result.secure_url, publicId: result.public_id };
       });
       uploadedPhotos = await Promise.all(uploadPromises);
