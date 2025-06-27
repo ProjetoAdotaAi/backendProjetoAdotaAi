@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { generatePetListLinks, addPetLinks } from '../utils/hateos.js';
+import notificationPublisher from '../utils/notificationPublisher.js';
 
 const prisma = new PrismaClient();
 
@@ -50,6 +51,14 @@ export async function createInteraction(req, res) {
         petId,
         type,
       },
+      include: {
+        pet: {
+          include: {
+            owner: true
+          }
+        },
+        user: true
+      }
     });
 
     const baseUrl = `${req.protocol}://${req.get('host')}`;

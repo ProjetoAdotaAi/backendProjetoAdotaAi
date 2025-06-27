@@ -20,6 +20,7 @@ model User {
   address        Address?
   pets           Pet[]
   interactions   PetInteraction[]
+  reports        Report[]
 }
 
 model Address {
@@ -70,6 +71,7 @@ model Pet {
   owner       User       @relation(fields: [ownerId], references: [id])
   photos      PetPhoto[]
   petInteractions PetInteraction[]
+  reports     Report[]
 }
 
 model PetPhoto {
@@ -82,12 +84,16 @@ model PetPhoto {
 
 model Report {
   id         String   @id @default(uuid())
-  petId     String
+  petId      String
   userId     String
   reportText String
   status     String   @default("PENDING")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  
+  // Relações
+  pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum InteractionType {

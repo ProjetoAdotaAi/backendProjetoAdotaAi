@@ -16,12 +16,33 @@ consumeReports(async (report) => {
 
   // Atualiza o status do report na API principal
   try {
-    await axios.patch(
-    `http://host.docker.internal:4040/api/reports/${report.reportId}/status`,
-    { status: result.decision }
-  );
-    console.log('Status do report atualizado na API principal.');
+    console.log('Enviando PATCH para API principal:', {
+      url: `http://api:4040/api/reports/${report.reportId}/status`,
+      status: result.decision,
+      reportId: report.reportId
+    });
+
+    const response = await axios.patch(
+      `http://api:4040/api/reports/${report.reportId}/status`,
+      { status: result.decision },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log('Status do report atualizado na API principal. Response:', response.status);
   } catch (err) {
-    console.error('Erro ao atualizar status na API principal:', err.message);
+    console.error('ERRO DETALHADO ao atualizar status na API principal:', {
+      message: err.message,
+      status: err.response?.status,
+      statusText: err.response?.statusText,
+      data: err.response?.data,
+      url: err.config?.url,
+      method: err.config?.method,
+      headers: err.config?.headers,
+      requestData: err.config?.data
+    });
   }
 });

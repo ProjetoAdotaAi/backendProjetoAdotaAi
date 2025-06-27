@@ -89,10 +89,49 @@ services:
       - app-network
     restart: unless-stopped
 
+  # Notification Microservice
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://notifications:notifications123@db_notifications:5432/notificationsdb
+      PORT: 3003
+      RABBIT_URL: amqp://guest:guest@rabbitmq:5672
+      NOTIFICATION_QUEUE: notifications
+      JWT_SECRET: adotaai-secret-key-2024
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:4040
+      NODE_ENV: development
+    ports:
+      - "3003:3003"
+    depends_on:
+      - db_notifications
+      - rabbitmq
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Database for Notifications
+  db_notifications:
+    container_name: db_notifications
+    image: postgres:15
+    environment:
+      POSTGRES_USER: notifications
+      POSTGRES_PASSWORD: notifications123
+      POSTGRES_DB: notificationsdb
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+    volumes:
+      - pgdata_notifications:/var/lib/postgresql/data
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   pgdata_api:
-  pgdata_report: 
+  pgdata_report:
+  pgdata_notifications: 

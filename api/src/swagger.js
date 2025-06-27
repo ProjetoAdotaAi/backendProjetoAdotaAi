@@ -8,7 +8,7 @@ const doc = {
     info: {
         version: "1.0.0",
         title: "API ADOTAÍ",
-        description: "Documentação da API ADOTAÍ",
+        description: "Documentação da API ADOTAÍ\n\n## Microserviços Relacionados\n\n- **Notification Service**: [http://localhost:3003/swagger/](http://localhost:3003/swagger/) - Documentação da API de notificações\n- **Report Microservice**: Serviço de relatórios com moderação por IA",
     },
     servers: [
         {

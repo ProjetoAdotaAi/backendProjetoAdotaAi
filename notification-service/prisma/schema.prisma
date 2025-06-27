@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   // ID do usuário que vai receber a notificação
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?    // Dados extras da notificação (reportId, petId, etc)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  REPORT_PROCESSED  // Quando um report é processado (removido/inativado)
+  PET_ADOPTED      // Quando um pet é adotado
+  USER_MESSAGE     // Mensagem de sistema
+  SYSTEM_UPDATE    // Atualizações do sistema
+  
+  @@map("notification_types")
+}
+
+model NotificationTemplate {
+  id       String           @id @default(uuid())
+  type     NotificationType @unique
+  title    String
+  message  String           // Pode conter placeholders como {petName}, {action}
+  active   Boolean          @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("notification_templates")
+}

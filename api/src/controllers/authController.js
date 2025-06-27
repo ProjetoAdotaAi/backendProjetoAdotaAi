@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 import { mailOptions } from "../utils/mailOptions.js";
 
 const prisma = new PrismaClient();
-const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY;
 
 export async function login(req, res) {
    /*

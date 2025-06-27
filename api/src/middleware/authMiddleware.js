@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY;
 
 console.log("SECRET_KEY para verificação:", SECRET_KEY ? "Carregada" : "NÃO CARREGADA ou vazia");
 if (!SECRET_KEY) {
